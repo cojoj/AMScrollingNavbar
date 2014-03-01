@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AMScrollingNavbarViewController.h"
 
-@interface AMViewController : UIViewController
+@interface AMViewController : AMScrollingNavbarViewController
 
 @end

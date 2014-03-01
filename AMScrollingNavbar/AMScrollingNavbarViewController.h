@@ -46,4 +46,6 @@
  */
 @property (nonatomic, assign) BOOL scrollingEnabled;
 
+@property (nonatomic, weak) IBOutlet UINavigationBar *navigationBar;
+
 @end

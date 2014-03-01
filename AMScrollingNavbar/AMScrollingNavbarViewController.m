@@ -42,27 +42,27 @@
 	
 	/* The navbar fadeout is achieved using an overlay view with the same barTintColor.
 	 this might be improved by adjusting the alpha component of every navbar child */
-	CGRect frame = self.navigationController.navigationBar.frame;
+	CGRect frame = self.navigationBar.frame;
 	frame.origin = CGPointZero;
 	self.overlay = [[UIView alloc] initWithFrame:frame];
     
     // Use tintColor instead of barTintColor on iOS < 7
-    if ([self.navigationController.navigationBar respondsToSelector:@selector(setBarTintColor:)]) {
-        if (!self.navigationController.navigationBar.barTintColor) {
+    if ([self.navigationBar respondsToSelector:@selector(setBarTintColor:)]) {
+        if (!self.navigationBar.barTintColor) {
             NSLog(@"[%s]: %@", __func__, @"[AMScrollingNavbarViewController] Warning: no bar tint color set");
         }
-        [self.overlay setBackgroundColor:self.navigationController.navigationBar.barTintColor];
+        [self.overlay setBackgroundColor:self.navigationBar.barTintColor];
     } else {
-        [self.overlay setBackgroundColor:self.navigationController.navigationBar.tintColor];
+        [self.overlay setBackgroundColor:self.navigationBar.tintColor];
     }
 	
-	if ([self.navigationController.navigationBar isTranslucent]) {
+	if ([self.navigationBar isTranslucent]) {
 		NSLog(@"[%s]: %@", __func__, @"[AMScrollingNavbarViewController] Warning: the navigation bar should not be translucent");
 	}
 	
 	[self.overlay setUserInteractionEnabled:NO];
 	[self.overlay setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
-	[self.navigationController.navigationBar addSubview:self.overlay];
+	[self.navigationBar addSubview:self.overlay];
 	[self.overlay setAlpha:0];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
@@ -91,7 +91,7 @@
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
     CGRect frame = self.overlay.frame;
-	frame.size.height = self.navigationController.navigationBar.frame.size.height;
+	frame.size.height = self.navigationBar.frame.size.height;
 	self.overlay.frame = frame;
     
     [self calculateConstants]; // Update values depending on orientation
@@ -108,8 +108,8 @@
 			self.statusBar = 0;
 		} else {
 			self.deltaLimit = 24;
-			self.compatibilityHeight = 64;
-			self.statusBar = 20;
+			self.compatibilityHeight = 44;
+			self.statusBar = 0;
 		}
     } else {
 		if ([[UIApplication sharedApplication] isStatusBarHidden]) {
@@ -119,7 +119,7 @@
 		} else {
 			self.deltaLimit = (UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]) ? 24 : 12);
 			self.compatibilityHeight = (UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]) ? 64 : 52);
-			self.statusBar = 20;
+			self.statusBar = 0;
 		}
     }
 }
@@ -183,15 +183,15 @@
 			return;
 		}
 		
-		frame = self.navigationController.navigationBar.frame;
-		
+		frame = self.navigationBar.frame;
+		NSLog(@"before %@", NSStringFromCGRect(frame));
 		if (frame.origin.y - delta < -self.deltaLimit) {
 			delta = frame.origin.y + self.deltaLimit;
 		}
 		
 		frame.origin.y = MAX(-self.deltaLimit, frame.origin.y - delta);
-		self.navigationController.navigationBar.frame = frame;
-		
+		self.navigationBar.frame = frame;
+		NSLog(@"after  %@", NSStringFromCGRect(frame));
 		if (frame.origin.y == -self.deltaLimit) {
 			self.isCollapsed = YES;
 			self.isExpanded = NO;
@@ -205,13 +205,13 @@
 			return;
 		}
 		
-		frame = self.navigationController.navigationBar.frame;
+		frame = self.navigationBar.frame;
 		
 		if (frame.origin.y - delta > self.statusBar) {
 			delta = frame.origin.y - self.statusBar;
 		}
 		frame.origin.y = MIN(20, frame.origin.y - delta);
-		self.navigationController.navigationBar.frame = frame;
+		self.navigationBar.frame = frame;
 		
 		if (frame.origin.y == self.statusBar) {
 			self.isExpanded = YES;
@@ -224,16 +224,16 @@
 
 - (void)checkForPartialScroll
 {
-	CGFloat pos = self.navigationController.navigationBar.frame.origin.y;
+	CGFloat pos = self.navigationBar.frame.origin.y;
 	
 	// Get back down
 	if (pos >= -2) {
 		[UIView animateWithDuration:0.2 animations:^{
 			CGRect frame;
-			frame = self.navigationController.navigationBar.frame;
+			frame = self.navigationBar.frame;
 			CGFloat delta = frame.origin.y - self.statusBar;
 			frame.origin.y = MIN(20, frame.origin.y - delta);
-			self.navigationController.navigationBar.frame = frame;
+			self.navigationBar.frame = frame;
 			
 			self.isExpanded = YES;
 			self.isCollapsed = NO;
@@ -247,10 +247,10 @@
 		// And back up
 		[UIView animateWithDuration:0.2 animations:^{
 			CGRect frame;
-			frame = self.navigationController.navigationBar.frame;
+			frame = self.navigationBar.frame;
 			CGFloat delta = frame.origin.y + self.deltaLimit;
 			frame.origin.y = MAX(-self.deltaLimit, frame.origin.y - delta);
-			self.navigationController.navigationBar.frame = frame;
+			self.navigationBar.frame = frame;
 			
 			self.isExpanded = NO;
 			self.isCollapsed = YES;
@@ -263,7 +263,7 @@
 - (void)updateSizingWithDelta:(CGFloat)delta
 {
 	// At this point the navigation bar is already been placed in the right position, it'll be the reference point for the other views'sizing
-	CGRect frame = self.navigationController.navigationBar.frame;
+	CGRect frame = self.navigationBar.frame;
 	
 	[self updateNavbarAlpha:delta];
 	
@@ -294,7 +294,7 @@
 
 - (void)updateNavbarAlpha:(CGFloat)delta
 {
-	CGRect frame = self.navigationController.navigationBar.frame;
+	CGRect frame = self.navigationBar.frame;
 	
 	// Change the alpha channel of every item on the navbr. The overlay will appear, while the other objects will disappear, and vice versa
 	float alpha = (frame.origin.y + self.deltaLimit) / frame.size.height;
@@ -306,13 +306,13 @@
 		obj.customView.alpha = alpha;
 	}];
 	self.navigationItem.titleView.alpha = alpha;
-	self.navigationController.navigationBar.tintColor = [self.navigationController.navigationBar.tintColor colorWithAlphaComponent:alpha];
+	self.navigationBar.tintColor = [self.navigationController.navigationBar.tintColor colorWithAlphaComponent:alpha];
 }
 
 - (void)refreshNavbar
 {
 	if (self.scrollableView != nil) {
-		[self.navigationController.navigationBar bringSubviewToFront:self.overlay];
+		[self.navigationBar bringSubviewToFront:self.overlay];
 	}
 }
 
