@@ -191,12 +191,11 @@
 		
 		frame.origin.y = MAX(-self.deltaLimit, frame.origin.y - delta);
 		self.navigationBar.frame = frame;
-		NSLog(@"after  %@", NSStringFromCGRect(frame));
 		if (frame.origin.y == -self.deltaLimit) {
 			self.isCollapsed = YES;
 			self.isExpanded = NO;
 		}
-		
+		NSLog(@"after  %@", NSStringFromCGRect(frame));		
 		[self updateSizingWithDelta:delta];
 	}
 	
@@ -224,6 +223,7 @@
 
 - (void)checkForPartialScroll
 {
+	return;
 	CGFloat pos = self.navigationBar.frame.origin.y;
 	
 	// Get back down
